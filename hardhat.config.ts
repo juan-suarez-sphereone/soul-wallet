@@ -10,12 +10,8 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import dotenv from "dotenv";
 dotenv.config();
-const MUMBAI_PRIVATE_KEY =
-  process.env.MUMBAI_PRIVATE_KEY! ||
-  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // test private key
-const MAINNET_PRIVATE_KEY =
-  process.env.MAINNET_PRIVATE_KEY! ||
-  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // test private key
+const MUMBAI_PRIVATE_KEY = process.env.MUMBAI_PRIVATE_KEY; // test private key
+const MAINNET_PRIVATE_KEY = process.env.MAINNET_PRIVATE_KEY;
 
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
@@ -73,7 +69,9 @@ const config: HardhatUserConfig = {
     },
   },
   etherscan: {
-    apiKey: "88IYFKQV8S4AJCQ3AFKG21E9UP8XMVJS8N",
+    apiKey: {
+      polygonMumbai: "88IYFKQV8S4AJCQ3AFKG21E9UP8XMVJS8N",
+    },
   },
   paths: {
     sources: "./contracts",

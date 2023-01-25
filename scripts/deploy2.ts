@@ -69,7 +69,7 @@ async function main() {
   } else if (network.name === "mumbai") {
     EOA = await ethers.getSigner("0x474220E3aE3B3b31bba681ea8ECBBd8a535D0Bb7");
     create2Factory = "0xE1Dd62164bD98Ea33e67B08eD875848b6e130B25";
-    WETHContractAddress = "0xf71756EeAb7c80617A7572Cb185A49d945b5488c";
+    WETHContractAddress = "0x5AD9Bc757396CBa590664eF6B48382719D4b5114";
   } else if (isLocalTestnet()) {
     EOA = await ethers.getSigner("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
     let create2 = await new Create2Factory__factory(EOA).deploy();
@@ -95,53 +95,9 @@ async function main() {
 
   // #region Entrypoint
 
-  const EntryPointFactory = await ethers.getContractFactory("EntryPoint");
-  // get EntryPointFactory deployed bytecode
-  const EntryPointFactoryBytecode = EntryPointFactory.bytecode;
-  // get create2 address
-  const EntryPointInitCodeHash = keccak256(EntryPointFactoryBytecode);
-  const EntryPointAddress = getCreate2Address(
-    create2Factory,
-    salt,
-    EntryPointInitCodeHash
-  );
+  const EntryPointAddress = "0x69ed680081Dc4CCD5B05E28df839a06AA93E9313";
   console.log("EntryPointAddress:", EntryPointAddress);
   // if not deployed, deploy
-  if ((await ethers.provider.getCode(EntryPointAddress)) === "0x") {
-    console.log("EntryPoint not deployed, deploying...");
-    const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
-      return ethers.BigNumber.from(Math.pow(10, 7) + "");
-      //return estimatedGasLimit.mul(10)  // 10x gas
-    };
-    const create2FactoryContract = Create2Factory__factory.connect(
-      create2Factory,
-      EOA
-    );
-    const estimatedGas = await create2FactoryContract.estimateGas.deploy(
-      EntryPointFactoryBytecode,
-      salt
-    );
-    const tx = await create2FactoryContract.deploy(
-      EntryPointFactoryBytecode,
-      salt,
-      { gasLimit: increaseGasLimit(estimatedGas) }
-    );
-    console.log("EntryPoint tx:", tx.hash);
-    while ((await ethers.provider.getCode(EntryPointAddress)) === "0x") {
-      console.log("EntryPoint not deployed, waiting...");
-      await new Promise((r) => setTimeout(r, 3000));
-    }
-    console.log("EntryPoint deployed, verifying...");
-    try {
-      await run("verify:verify", {
-        address: EntryPointAddress,
-        constructorArguments: [],
-      });
-    } catch (error) {
-      console.log("EntryPoint verify failed:", error);
-    }
-  } else {
-  }
 
   // #endregion Entrypoint
 
@@ -350,11 +306,216 @@ async function main() {
   console.log("walletAddress: " + walletAddress);
 
   // send 0.02 WETH to wallet
-  const WETHContract = WETH9__factory.connect(WETHContractAddress, EOA);
-  const _b = await WETHContract.balanceOf(walletAddress);
+  const FUSDCAbi = [
+    { inputs: [], stateMutability: "nonpayable", type: "constructor" },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "address",
+          name: "owner",
+          type: "address",
+        },
+        {
+          indexed: true,
+          internalType: "address",
+          name: "spender",
+          type: "address",
+        },
+        {
+          indexed: false,
+          internalType: "uint256",
+          name: "value",
+          type: "uint256",
+        },
+      ],
+      name: "Approval",
+      type: "event",
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "address",
+          name: "previousOwner",
+          type: "address",
+        },
+        {
+          indexed: true,
+          internalType: "address",
+          name: "newOwner",
+          type: "address",
+        },
+      ],
+      name: "OwnershipTransferred",
+      type: "event",
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "address",
+          name: "from",
+          type: "address",
+        },
+        { indexed: true, internalType: "address", name: "to", type: "address" },
+        {
+          indexed: false,
+          internalType: "uint256",
+          name: "value",
+          type: "uint256",
+        },
+      ],
+      name: "Transfer",
+      type: "event",
+    },
+    {
+      inputs: [
+        { internalType: "address", name: "owner", type: "address" },
+        { internalType: "address", name: "spender", type: "address" },
+      ],
+      name: "allowance",
+      outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        { internalType: "address", name: "spender", type: "address" },
+        { internalType: "uint256", name: "amount", type: "uint256" },
+      ],
+      name: "approve",
+      outputs: [{ internalType: "bool", name: "", type: "bool" }],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [{ internalType: "address", name: "account", type: "address" }],
+      name: "balanceOf",
+      outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        { internalType: "address", name: "account", type: "address" },
+        { internalType: "uint256", name: "_qty", type: "uint256" },
+      ],
+      name: "burnTokens",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "decimals",
+      outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        { internalType: "address", name: "spender", type: "address" },
+        { internalType: "uint256", name: "subtractedValue", type: "uint256" },
+      ],
+      name: "decreaseAllowance",
+      outputs: [{ internalType: "bool", name: "", type: "bool" }],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        { internalType: "address", name: "spender", type: "address" },
+        { internalType: "uint256", name: "addedValue", type: "uint256" },
+      ],
+      name: "increaseAllowance",
+      outputs: [{ internalType: "bool", name: "", type: "bool" }],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        { internalType: "address", name: "reciver", type: "address" },
+        { internalType: "uint256", name: "_qty", type: "uint256" },
+      ],
+      name: "mintTokens",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "name",
+      outputs: [{ internalType: "string", name: "", type: "string" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "owner",
+      outputs: [{ internalType: "address", name: "", type: "address" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "renounceOwnership",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "symbol",
+      outputs: [{ internalType: "string", name: "", type: "string" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "totalSupply",
+      outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        { internalType: "address", name: "to", type: "address" },
+        { internalType: "uint256", name: "amount", type: "uint256" },
+      ],
+      name: "transfer",
+      outputs: [{ internalType: "bool", name: "", type: "bool" }],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        { internalType: "address", name: "from", type: "address" },
+        { internalType: "address", name: "to", type: "address" },
+        { internalType: "uint256", name: "amount", type: "uint256" },
+      ],
+      name: "transferFrom",
+      outputs: [{ internalType: "bool", name: "", type: "bool" }],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [{ internalType: "address", name: "newOwner", type: "address" }],
+      name: "transferOwnership",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+  ];
+  const FUSDCinstance = new ethers.Contract(WETHContractAddress, FUSDCAbi, EOA);
+
+  const _b = await FUSDCinstance.balanceOf(WETHTokenPaymasterAddress);
   console.log(_b);
-  console.log("sending 0,0002 WETH to wallet");
-  await WETHContract.transferFrom(EOA.address, walletAddress, 2000000);
+  console.log("sending 2 FUSDC to wallet");
+  await FUSDCinstance.transferFrom(EOA.address, walletAddress, 50);
 
   // check if wallet is activated (deployed)
   const code = await ethers.provider.getCode(walletAddress);
@@ -371,7 +532,7 @@ async function main() {
     } else {
       eip1559GasFee = mockGasFee;
     }
-
+    console.log(code);
     const activateOp = EIP4337Lib.activateWalletOp(
       WalletLogicAddress,
       EntryPointAddress,
@@ -404,7 +565,7 @@ async function main() {
     );
     const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
     const re = await EntryPoint.handleOps([activateOp], EOA.address);
-    console.log(re);
+    console.log("hola", re);
   }
 
   // #endregion deploy wallet
