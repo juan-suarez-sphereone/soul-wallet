@@ -39,14 +39,14 @@ abstract contract BaseTokenPaymaster is BasePaymaster {
     /**
      * @notice The ERC20 token that will be used to pay for the gas
      */
-    IERC20 public immutable ERC20Token;
+    IERC20 public  ERC20Token;
 
 
     bool public isPaused = false;
 
 
     //calculated cost of the postOp
-    uint256 private immutable COST_OF_POST;
+    uint256 private  COST_OF_POST;
 
     /**
      * @notice The soulwallet proxy bytecode length
@@ -64,12 +64,12 @@ abstract contract BaseTokenPaymaster is BasePaymaster {
 
     constructor(
         EntryPoint _entryPoint,
-        IERC20 _ERC20Token,
-        uint256 _COST_OF_POST,
+        
+       
         address _owner
     ) BasePaymaster(_entryPoint) {
-        ERC20Token = _ERC20Token;
-        COST_OF_POST = _COST_OF_POST;
+       
+       
         if(_owner != address(0)){
             _transferOwnership(_owner);
         }
@@ -105,10 +105,11 @@ abstract contract BaseTokenPaymaster is BasePaymaster {
         emit KnownWalletLogicHashRemove(walletCodeHash);
     }
 
-    function withdraw(address payable to) external onlyOwner {
+    function withdraw(address payable to, IERC20 _Token) external onlyOwner {
+        ERC20Token = _Token;
         uint256 balance = ERC20Token.balanceOf(address(this));
         require(balance >= 0, "not enough balance");
-        ERC20Token.transfer(to, balance);
+        _Token.transfer(to, balance);
     }
 
     function tokenPrice(uint256 ethers) public view virtual returns (uint256) {

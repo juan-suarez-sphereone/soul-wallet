@@ -16,7 +16,7 @@ import "./interfaces/IEntryPoint.sol";
 abstract contract BasePaymaster is IPaymaster, Ownable {
 
     IEntryPoint public entryPoint;
-
+    
     constructor(IEntryPoint _entryPoint) {
         setEntryPoint(_entryPoint);
     }
