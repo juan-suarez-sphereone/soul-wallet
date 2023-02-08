@@ -33,9 +33,9 @@ async function main() {
   let create2Factory = "";
   let WETHContractAddress = "";
   let EOA = (await ethers.getSigners())[0];
-  let WalletLogicAddress = "0x68f8b519006Ba148988c29C6816b369AD0ef5c2b";
-  let EntryPointAddress = "0xA0a5f4014064Ef0B4DF13d55Ef201F585DBBd7e2";
-  let WETHTokenPaymasterAddress = "0x695823A0feD349eb7197CC68246de20CF5d429Ce";
+  let WalletLogicAddress = "0x091A9CC401cA4f1d91F6bd187ff2408D3E3f04Fb";
+  let EntryPointAddress = "0x4bd797204A6eB2F33DB52c898Dd5Fdfc19bbc334";
+  let WETHTokenPaymasterAddress = "0x67664a169D154Ead598C67D288c16b1F4f9A1949";
 
   if (network.name === "mumbai") {
     create2Factory = "0x4593E032481bf78A7462822B4b279306989cfD36";
@@ -56,6 +56,16 @@ async function main() {
 
   // #region deploy wallet
 
+  const tokenAndPaymaster = [
+    {
+      token: "0x217c132171845A65A40e612A0A28C915a84214b4",
+      paymaster: WETHTokenPaymasterAddress,
+    },
+  ];
+
+  const packedTokenAndPaymaster =
+    EIP4337Lib.Utils.tokenAndPaymaster.pack(tokenAndPaymaster)
+
   const upgradeDelay = 10;
   const guardianDelay = 10;
   const walletAddress = await EIP4337Lib.calculateWalletAddress(
@@ -65,8 +75,7 @@ async function main() {
     upgradeDelay,
     guardianDelay,
     EIP4337Lib.Defines.AddressZero,
-    WETHContractAddress,
-    WETHTokenPaymasterAddress,
+    packedTokenAndPaymaster,
     0,
     create2Factory
   );
@@ -111,10 +120,10 @@ async function main() {
       0,
       create2Factory,
       ethers.utils
-        .parseUnits(eip1559GasFee.medium.suggestedMaxFeePerGas, "gwei")
+        .parseUnits(eip1559GasFee.low.suggestedMaxFeePerGas, "gwei")
         .toString(),
       ethers.utils
-        .parseUnits(eip1559GasFee.medium.suggestedMaxPriorityFeePerGas, "gwei")
+        .parseUnits(eip1559GasFee.low.suggestedMaxPriorityFeePerGas, "gwei")
         .toString()
     );
 

@@ -26,22 +26,20 @@ import { Utils } from "../test/Utils";
 import dotenv from "dotenv";
 dotenv.config();
 import * as ethUtil from "ethereumjs-util";
-import { AddressZero } from "./lib/dist/defines/address";
 
 async function main() {
- 
   // npx hardhat run --network goerli scripts/deploy.ts
 
   let create2Factory = "";
   let WETHContractAddress = "";
   let EOA = (await ethers.getSigners())[0];
   let EntryPointAddress = "0x4bd797204A6eB2F33DB52c898Dd5Fdfc19bbc334";
-  let WETHTokenPaymasterAddress = "0x67664a169D154Ead598C67D288c16b1F4f9A1949";
-  let walletAddress = "0x3f90807899d20E7a9F049E077963771C787721CF"
+  let WETHTokenPaymasterAddress = "0x695823A0feD349eb7197CC68246de20CF5d429Ce";
+  let walletAddress = "0x3f90807899d20E7a9F049E077963771C787721CF";
 
   if (network.name === "mumbai") {
     create2Factory = "0x4593E032481bf78A7462822B4b279306989cfD36";
-    WETHContractAddress = "0x217c132171845A65A40e612A0A28C915a84214b4";
+    WETHContractAddress = "0x8337A008949C0e6F3D8ac5cE6956d4d17fcfCeC5";
   }
 
   if (!create2Factory) {
@@ -66,32 +64,31 @@ async function main() {
     throw new Error("eip1559GasFee is null");
   }
 
+  console.log("EOA Address", EOA.address);
 
-  const tokenAndPaymaster = [
-    {
-      token: "0x164C681FB5eA009508B49230db7d47749206C16A",
-      paymaster: WETHTokenPaymasterAddress,
-    },
-  ];
+  // send NFT TO WALLET CON ESTO FUNCIONA OBVIAMENTE....
+  // const WETHContract = WETH9__factory.connect(WETHContractAddress, EOA);
+  // const _b = await WETHContract.balanceOf(walletAddress);
+  // console.log("SEND NFT TO SMART WALLET");
+  // await WETHContract.transferFrom(EOA.address, walletAddress, "3");
 
-  const packedTokenAndPaymaster =
-    EIP4337Lib.Utils.tokenAndPaymaster.pack(tokenAndPaymaster)
-
-  const sendWETHOP = await EIP4337Lib.Tokens.ERC20.transfer(
+  // NO FUNCIONANDO. ME INDICA QUE NO ES EL OWNER
+  const sendWETHOP = await EIP4337Lib.Tokens.ERC721.transferFrom(
     ethers.provider,
     walletAddress,
     nonce,
     EntryPointAddress,
     WETHTokenPaymasterAddress,
     ethers.utils
-      .parseUnits(eip1559GasFee.medium.suggestedMaxFeePerGas, "gwei")
+      .parseUnits(eip1559GasFee.low.suggestedMaxFeePerGas, "gwei")
       .toString(),
     ethers.utils
-      .parseUnits(eip1559GasFee.medium.suggestedMaxPriorityFeePerGas, "gwei")
+      .parseUnits(eip1559GasFee.low.suggestedMaxPriorityFeePerGas, "gwei")
       .toString(),
-    WETHContractAddress,
-    "0x95718f7cd230b37E7517Fceb45E733324D7B10E2",
-    "34500000000"
+    WETHContractAddress, // NFT Contract
+    walletAddress, // FROM this address
+    EOA.address, // TO THIS ADDRESS
+    "5" // This Token ID
   );
 
   if (!sendWETHOP) {
@@ -102,12 +99,13 @@ async function main() {
     walletOwner,
     Utils.signMessage(userOpHash, walletOwnerPrivateKey)
   );
-  
+
   await EIP4337Lib.RPC.simulateHandleOp(
     ethers.provider,
     EntryPointAddress,
     sendWETHOP
   );
+
   const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
   console.log(sendWETHOP);
   const re = await EntryPoint.handleOps([sendWETHOP], EOA.address);

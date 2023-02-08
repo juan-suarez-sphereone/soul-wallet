@@ -32,7 +32,7 @@ async function main() {
 
   let create2Factory = "";
   let WETHContractAddress = "";
-  let EntryPointAddress = "0x4bd797204A6eB2F33DB52c898Dd5Fdfc19bbc334"
+  let EntryPointAddress = "0x0e15E3A09E03709888901E18aEa9fF580BFB69a7"
   let EOA = (await ethers.getSigners())[0];
 
   if (network.name === "mumbai") {
@@ -47,7 +47,7 @@ async function main() {
     throw new Error("WETHContractAddress not set");
   }
 
-  const salt = hexZeroPad(hexlify(1), 32);
+  const salt = hexZeroPad(hexlify(35), 32);
 
   // #region WETHPaymaster
 
@@ -98,7 +98,7 @@ async function main() {
       await new Promise((r) => setTimeout(r, 6000));
     }
     {
-      const _paymasterStake = "" + Math.pow(12, 17);
+      const _paymasterStake = "" + Math.pow(12, 16);
       const WETHPaymaster = await WETHTokenPaymaster__factory.connect(
         WETHTokenPaymasterAddress,
         EOA

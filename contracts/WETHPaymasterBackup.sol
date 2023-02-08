@@ -10,9 +10,9 @@ import "./BasePaymaster.sol";
  * Paymaster that accepts WETH tokens as payment.
  * The paymaster must be approved to transfer tokens from the user wallet.
  */
-contract WETHTokenPaymaster is BasePaymaster {
+contract WETHTokenPaymaster1111 is BasePaymaster {
     //calculated cost of the postOp
-    uint256 constant COST_OF_POST = 20000;    
+    uint256 constant COST_OF_POST = 20000;
 
     using UserOperationLib for UserOperation;
     IERC20 public WETHToken;
@@ -145,10 +145,8 @@ contract WETHTokenPaymaster is BasePaymaster {
             (address, uint256)
         );
         //actualGasCost is known to be no larger than the above requiredPreFund, so the transfer should succeed.
-        WETHToken.transferFrom(
-            sender,
-            address(this),
-            actualGasCost + (COST_OF_POST * gasPrice)
-        );
+        
+        uint256 transferAmount = actualGasCost + (COST_OF_POST * gasPrice);
+        payable(sender).transfer(transferAmount);
     }
 }

@@ -42,7 +42,7 @@ async function main() {
     throw new Error("create2Factory not set");
   }
  
-  const salt = hexZeroPad(hexlify(3), 32);
+  const salt = hexZeroPad(hexlify(30), 32);
 
   // #region Entrypoint
 
