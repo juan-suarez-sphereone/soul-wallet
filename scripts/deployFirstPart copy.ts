@@ -27,12 +27,10 @@ import dotenv from "dotenv";
 dotenv.config();
 import * as ethUtil from "ethereumjs-util";
 
-
 async function main() {
- 
   let create2Factory = "";
   let EOA = (await ethers.getSigners())[0];
-  console.log("EOA Address: ", EOA.address)
+  console.log("EOA Address: ", EOA.address);
 
   if (network.name === "mumbai") {
     create2Factory = "0x4593E032481bf78A7462822B4b279306989cfD36";
@@ -41,8 +39,8 @@ async function main() {
   if (!create2Factory) {
     throw new Error("create2Factory not set");
   }
- 
-  const salt = hexZeroPad(hexlify(80), 32);
+
+  const salt = hexZeroPad(hexlify(90), 32);
 
   // #region Entrypoint
 
@@ -57,7 +55,7 @@ async function main() {
     EntryPointInitCodeHash
   );
   console.log("EntryPointAddress:", EntryPointAddress);
-  
+
   // if not deployed, deploy
   if ((await ethers.provider.getCode(EntryPointAddress)) === "0x") {
     console.log("EntryPoint not deployed, deploying...");
@@ -102,7 +100,7 @@ async function main() {
   const WalletLogicFactory = await ethers.getContractFactory("SmartWallet");
   const WalletLogicBytecode = WalletLogicFactory.bytecode;
   const WalletLogicInitCodeHash = keccak256(WalletLogicBytecode);
-  console.log("Wallet Logic Code Hash:", WalletLogicInitCodeHash)
+  console.log("Wallet Logic Code Hash:", WalletLogicInitCodeHash);
   const WalletLogicAddress = getCreate2Address(
     create2Factory,
     salt,

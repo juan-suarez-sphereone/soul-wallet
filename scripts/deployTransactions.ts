@@ -28,19 +28,44 @@ dotenv.config();
 import * as ethUtil from "ethereumjs-util";
 
 async function main() {
- 
   // npx hardhat run --network goerli scripts/deploy.ts
-
+  let mockGasFee = {
+    low: {
+      suggestedMaxPriorityFeePerGas: "1",
+      suggestedMaxFeePerGas: "16.984563596",
+      minWaitTimeEstimate: 15000,
+      maxWaitTimeEstimate: 30000,
+    },
+    medium: {
+      suggestedMaxPriorityFeePerGas: "1.5",
+      suggestedMaxFeePerGas: "23.079160855",
+      minWaitTimeEstimate: 15000,
+      maxWaitTimeEstimate: 45000,
+    },
+    high: {
+      suggestedMaxPriorityFeePerGas: "2",
+      suggestedMaxFeePerGas: "29.173758114",
+      minWaitTimeEstimate: 15000,
+      maxWaitTimeEstimate: 60000,
+    },
+    estimatedBaseFee: "15.984563596",
+    networkCongestion: 0.31675,
+    latestPriorityFeeRange: ["0.131281956", "4.015436404"],
+    historicalPriorityFeeRange: ["0.02829803", "58.45567467"],
+    historicalBaseFeeRange: ["13.492240252", "17.51875421"],
+    priorityFeeTrend: "level",
+    baseFeeTrend: "down",
+  };
   let create2Factory = "";
   let WETHContractAddress = "";
   let EOA = (await ethers.getSigners())[0];
-  let EntryPointAddress = "0x0584224181D637bD4D32d2D41Bf783B3668D0F33";
-  let WETHTokenPaymasterAddress = "0xa1B1755b2856f0d531cafDdE4ec72fC46D6639c6";
-  let walletAddress = "0x42f74D6F0B405436000c3F7b3dF345bcA401EE0D"
+  let EntryPointAddress = "0xe683550A3D0605c95D586044C77eb9e3B7E947a6";
+  let WETHTokenPaymasterAddress = EIP4337Lib.Defines.AddressZero;
+  let walletAddress = "0x29245BA65003C4988b1cF2A07E8189d7cb1d1E8e";
 
   if (network.name === "mumbai") {
     create2Factory = "0x4593E032481bf78A7462822B4b279306989cfD36";
-    WETHContractAddress = "0x217c132171845A65A40e612A0A28C915a84214b4";
+    WETHContractAddress = "0x164c681fb5ea009508b49230db7d47749206c16a";
   }
 
   if (!create2Factory) {
@@ -53,7 +78,7 @@ async function main() {
   const chainId = await (await ethers.provider.getNetwork()).chainId;
 
   const walletOwner = EOA.address;
-  const walletOwnerPrivateKey = "0x" + [process.env.PRIVATE_KEY];
+  const walletOwnerPrivateKey = "0x" + [process.env.MUMBAI_PRIVATE_KEY];
 
   // #region send 1wei Weth to wallet
   const nonce = await EIP4337Lib.Utils.getNonce(walletAddress, ethers.provider);
@@ -72,14 +97,14 @@ async function main() {
     EntryPointAddress,
     WETHTokenPaymasterAddress,
     ethers.utils
-      .parseUnits(eip1559GasFee.medium.suggestedMaxFeePerGas, "gwei")
+      .parseUnits(mockGasFee.medium.suggestedMaxFeePerGas, "gwei")
       .toString(),
     ethers.utils
-      .parseUnits(eip1559GasFee.medium.suggestedMaxPriorityFeePerGas, "gwei")
+      .parseUnits(mockGasFee.medium.suggestedMaxPriorityFeePerGas, "gwei")
       .toString(),
     WETHContractAddress,
     EOA.address,
-    "1234567"
+    "200000000000000000"
   );
   if (!sendWETHOP) {
     throw new Error("sendWETHOP is null");
@@ -96,7 +121,7 @@ async function main() {
   );
   const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
   console.log(sendWETHOP);
-  const re = await EntryPoint.handleOps([sendWETHOP], EOA.address);
+  const re = await EntryPoint.handleOps([sendWETHOP], walletAddress);
   console.log(re);
 
   // #endregion send 1wei Weth to wallet
@@ -108,3 +133,7 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+//0.918771970874629169 EOA balance before
+// 0.000136228951403571 Tx gas fee
+// 0.918696602923874782 EOA balance after
