@@ -91,25 +91,25 @@ async function main() {
     upgradeDelay,
     guardianDelay,
     EIP4337Lib.Defines.AddressZero,
-    WETHContractAddress,
-    WETHTokenPaymasterAddress,
-    2,
+    EIP4337Lib.Defines.AddressZero,
+    EIP4337Lib.Defines.AddressZero,
+    19,
     create2Factory
   );
 
   console.log("walletAddress: " + walletAddress);
 
   // send 0.002 WETH to wallet
-  // const WETHContract = WETH9__factory.connect(WETHContractAddress, EOA);
-  // const _b = await WETHContract.balanceOf(walletAddress);
+  const WETHContract = WETH9__factory.connect(WETHContractAddress, EOA);
+  const _b = await WETHContract.balanceOf(walletAddress);
 
-  // console.log("sending 0.002 WETH to wallet");
-  // await WETHContract.transferFrom(
-  //   EOA.address,
-  //   walletAddress,
-  //   ethers.utils.parseEther("0.002")
-  // );
-  // console.log("SENT WETH TO WALLET");
+  console.log("sending 0.001 MATIC to wallet");
+  let tx = await EOA.sendTransaction({
+    to: walletAddress,
+    value: ethers.utils.parseEther("0.001"),
+  });
+  tx.wait();
+  console.log(tx);
 
   // check if wallet is activated (deployed)
   const code = await ethers.provider.getCode(walletAddress);
@@ -132,9 +132,9 @@ async function main() {
       upgradeDelay,
       guardianDelay,
       EIP4337Lib.Defines.AddressZero,
-      WETHContractAddress,
-      WETHTokenPaymasterAddress,
-      2,
+      EIP4337Lib.Defines.AddressZero,
+      EIP4337Lib.Defines.AddressZero,
+      19,
       create2Factory,
       ethers.utils
         .parseUnits(mockGasFee.medium.suggestedMaxFeePerGas, "gwei")
@@ -159,7 +159,14 @@ async function main() {
     const re = await EntryPoint.handleOps([activateOp], EOA.address);
     console.log(re);
   }
-
+  const paymasterContract = WETHTokenPaymaster__factory.connect(
+    WETHTokenPaymasterAddress,
+    EOA
+  );
+  const smartWalletCodeHash = keccak256(walletAddress);
+  console.log(smartWalletCodeHash);
+  const addWallet = await paymasterContract.addWallet(smartWalletCodeHash);
+  console.log(addWallet);
   // #endregion deploy wallet
 }
 

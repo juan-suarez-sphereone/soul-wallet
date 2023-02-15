@@ -1,13 +1,13 @@
 const { ethers } = require("hardhat");
 
 async function main() {
-  const SingletonFactory = await ethers.getContractFactory("SingletonFactory");
-  const SingletonFactoryInstance = await SingletonFactory.deploy();
+  // const SingletonFactory = await ethers.getContractFactory("SingletonFactory");
+  // const SingletonFactoryInstance = await SingletonFactory.deploy();
 
-  await SingletonFactoryInstance.deployed();
-  const create2Address = SingletonFactoryInstance.address;
+  // await SingletonFactoryInstance.deployed();
+  // const create2Address = SingletonFactoryInstance.address;
 
-  console.log(`Creat2 deployed at ${create2Address}`);
+  // console.log(`Creat2 deployed at ${create2Address}`);
 
   const WETHFactory = await ethers.getContractFactory("WETH9");
   const WETHInstance = await WETHFactory.deploy();

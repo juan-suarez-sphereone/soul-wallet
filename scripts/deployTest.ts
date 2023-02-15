@@ -21,6 +21,7 @@ import { Utils } from "../test/Utils";
 import dotenv from "dotenv";
 dotenv.config();
 import * as ethUtil from "ethereumjs-util";
+import { use } from "chai";
 let readline = require("readline-promise").default;
 const rlInterface = readline.createInterface({
   input: process.stdin,
@@ -44,6 +45,7 @@ let users = [
   { name: "Tincho", wallet: "0xdC7359023D0B8d6B59112aB53984dD95a40791C2" }, //10
   { name: "Diego", wallet: "0x06813E67bD5867e5DfB75F5BDF903fD0c648E892" }, // 11
   { name: "Coti", wallet: "0x8F1D1867B7DBf9CE0d8FD5D593127C13662E3b45" }, //13
+  { name: "Falopa", wallet: "0x19DE93376a2aA863365a3c030596E112B1e4A649" },
 ];
 
 async function main() {
@@ -61,8 +63,8 @@ async function main() {
       maxWaitTimeEstimate: 45000,
     },
     high: {
-      suggestedMaxPriorityFeePerGas: "2",
-      suggestedMaxFeePerGas: "29.173758114",
+      suggestedMaxPriorityFeePerGas: "20",
+      suggestedMaxFeePerGas: "290.173758114",
       minWaitTimeEstimate: 15000,
       maxWaitTimeEstimate: 60000,
     },
@@ -78,270 +80,321 @@ async function main() {
   console.log(
     "\n ✨  HELLO THERE!  ✨ \n\n 🤖  Welcome to our Smart Wallet demo 🤖 \n - Created with the Soul-Wallet Library - \n\n ✅ Make transactions between diferent tokens and accounts \n ✅ Paymaster will cover the gas fees for you \n\n"
   );
-  let username = await rlInterface.questionAsync(
-    "Please enter you user name:  "
-  );
-  console.log(`Welcome back ${username}`);
-
   let EOA = (await ethers.getSigners())[0];
   console.log("EOA Address: ", EOA.address);
-
-  let SmartWallet = users.filter(
-    (user) => user.name.toLowerCase() === username.toLowerCase()
-  )[0].wallet;
-  console.log("SmartWallet: ", SmartWallet);
-
+  let transactions = [];
   const walletOwner = EOA.address;
   const walletOwnerPrivateKey = "0x" + [process.env.MUMBAI_PRIVATE_KEY];
   let EntryPointAddress = "0xa40CBE24Bfe961b759FE8549040d5c80d56400e6";
   let PaymasterAddress = "0xE56CE953F65f14d9D09A19aC804665549D55F2D3";
+  let SmartWallet = "";
+  let menu = "";
 
-  console.log("Plese select from the menu what you'll be sending today");
-  console.log("1-Send Matic");
-  console.log("2-Send USDC");
-  console.log("3-Send WETH");
-  console.log("4-Send NFT");
-  let menu = await rlInterface.questionAsync("👉   ");
-
-  if (menu === "1") {
-    console.log(
-      "---------------------- 💰 BALANCE 💰 --------------------------"
+  while (menu !== "6") {
+    let username = await rlInterface.questionAsync(
+      "Please enter you user name:  "
     );
+    console.log(`Welcome back ${username}`);
 
-    const provider = ethers.getDefaultProvider();
-    let maticBalance = await provider.getBalance(SmartWallet);
-    console.log(`MATIC: ${ethers.utils.formatUnits(maticBalance)}`);
-
-    let destination = await rlInterface.questionAsync(
-      "Who do you want to send MATIC to: 👨🏻‍💻🧑🏻‍💻  "
-    );
-    let _to = users.filter(
-      (user) => user.name.toLowerCase() === destination.toLowerCase()
+    let SmartWallet = users.filter(
+      (user) => user.name.toLowerCase() === username.toLowerCase()
     )[0].wallet;
-    let amount = await rlInterface.questionAsync(
-      "How much do you want to send: 💰    "
-    );
-    const chainId = await (await ethers.provider.getNetwork()).chainId;
-    const nonce = await EIP4337Lib.Utils.getNonce(SmartWallet, ethers.provider);
+    console.log("SmartWallet: ", SmartWallet);
+    console.log("Plese select from the menu what you'll be sending today");
+    console.log("1-Send Matic");
+    console.log("2-Send USDC");
+    console.log("3-Send WETH");
+    console.log("4-Send NFT");
+    console.log("5-Checkout");
+    menu = await rlInterface.questionAsync("👉   ");
 
-    const sendMATIC = await EIP4337Lib.Tokens.ETH.transfer(
-      ethers.provider,
-      SmartWallet,
-      nonce,
-      EntryPointAddress,
-      PaymasterAddress,
-      ethers.utils
-        .parseUnits(mockGasFee.medium.suggestedMaxFeePerGas, "gwei")
-        .toString(),
-      ethers.utils
-        .parseUnits(mockGasFee.medium.suggestedMaxPriorityFeePerGas, "gwei")
-        .toString(),
-      _to,
-      amount
-    );
-    if (!sendMATIC) {
-      throw new Error("sendMATIC is null");
+    if (menu === "1") {
+      console.log(
+        "---------------------- 💰 BALANCE 💰 --------------------------"
+      );
+
+      const provider = ethers.getDefaultProvider();
+      let maticBalance = await provider.getBalance(SmartWallet);
+      console.log(`MATIC: ${ethers.utils.formatUnits(maticBalance)}`);
+
+      let destination = await rlInterface.questionAsync(
+        "Who do you want to send MATIC to: 👨🏻‍💻🧑🏻‍💻  "
+      );
+      let _to = users.filter(
+        (user) => user.name.toLowerCase() === destination.toLowerCase()
+      )[0].wallet;
+      let amount = await rlInterface.questionAsync(
+        "How much do you want to send: 💰    "
+      );
+      const chainId = await (await ethers.provider.getNetwork()).chainId;
+      const nonce = await EIP4337Lib.Utils.getNonce(
+        SmartWallet,
+        ethers.provider
+      );
+
+      const sendMATIC = await EIP4337Lib.Tokens.ETH.transfer(
+        ethers.provider,
+        SmartWallet,
+        nonce,
+        EntryPointAddress,
+        PaymasterAddress,
+        ethers.utils
+          .parseUnits(mockGasFee.medium.suggestedMaxFeePerGas, "gwei")
+          .toString(),
+        ethers.utils
+          .parseUnits(mockGasFee.medium.suggestedMaxPriorityFeePerGas, "gwei")
+          .toString(),
+        _to,
+        amount
+      );
+      if (!sendMATIC) {
+        throw new Error("sendMATIC is null");
+      }
+      const userOpHash = sendMATIC.getUserOpHash(EntryPointAddress, chainId);
+      sendMATIC.signWithSignature(
+        walletOwner,
+        Utils.signMessage(userOpHash, walletOwnerPrivateKey)
+      );
+      await EIP4337Lib.RPC.simulateHandleOp(
+        ethers.provider,
+        EntryPointAddress,
+        sendMATIC
+      );
+
+      console.log(`You will send ${amount} MATIC to ${_to}`);
+      let confirmation = await rlInterface.questionAsync(
+        "Confirm to add to queue: (Y/N)    "
+      );
+      if (confirmation.toLowerCase() === "y") {
+        let tx = {
+          to: _to,
+          amount: amount,
+          tx: sendMATIC,
+        };
+        transactions.push(tx);
+      } else if (confirmation.toLowerCase() === "n") {
+        console.log("Transaccion disccard ❌");
+      }
+
+      // #region Entrypoint
+
+      // if not deployed, deploy
+    } else if (menu === "2") {
+      let TokenAddress = "0x164C681FB5eA009508B49230db7d47749206C16A";
+      console.log(
+        "---------------------- 💰 BALANCE 💰 --------------------------"
+      );
+      let ERC20Contract = WETH9__factory.connect(TokenAddress, EOA);
+      console.log(`USDC: ${await ERC20Contract.balanceOf(SmartWallet)}`);
+      let destination = await rlInterface.questionAsync(
+        "Who do you want to send USDC to:👨🏻‍💻🧑🏻‍💻    "
+      );
+      let _to = users.filter(
+        (user) => user.name.toLowerCase() === destination.toLowerCase()
+      )[0].wallet;
+      let amount = await rlInterface.questionAsync(
+        "How much do you want to send: 💰  "
+      );
+      const chainId = await (await ethers.provider.getNetwork()).chainId;
+      const nonce = await EIP4337Lib.Utils.getNonce(
+        SmartWallet,
+        ethers.provider
+      );
+
+      const sendUSDC = await EIP4337Lib.Tokens.ERC20.transfer(
+        ethers.provider,
+        SmartWallet,
+        nonce,
+        EntryPointAddress,
+        PaymasterAddress,
+        ethers.utils
+          .parseUnits(mockGasFee.medium.suggestedMaxFeePerGas, "gwei")
+          .toString(),
+        ethers.utils
+          .parseUnits(mockGasFee.medium.suggestedMaxPriorityFeePerGas, "gwei")
+          .toString(),
+        TokenAddress,
+        _to,
+        amount
+      );
+      if (!sendUSDC) {
+        throw new Error("sendUSDC is null");
+      }
+      const userOpHash = sendUSDC.getUserOpHash(EntryPointAddress, chainId);
+      sendUSDC.signWithSignature(
+        walletOwner,
+        Utils.signMessage(userOpHash, walletOwnerPrivateKey)
+      );
+      await EIP4337Lib.RPC.simulateHandleOp(
+        ethers.provider,
+        EntryPointAddress,
+        sendUSDC
+      );
+      console.log(`You will send ${amount} USDC to ${_to}`);
+      let confirmation = await rlInterface.questionAsync(
+        "Confirm to add to queue: (Y/N)    "
+      );
+      if (confirmation.toLowerCase() === "y") {
+        let tx = {
+          to: _to,
+          amount: amount,
+          tx: sendUSDC,
+        };
+        transactions.push(tx);
+      } else if (confirmation.toLowerCase() === "n") {
+        console.log("Transaccion disccard ❌");
+      }
+    } else if (menu === "3") {
+      console.log(
+        "---------------------- 💰 BALANCE 💰 --------------------------"
+      );
+      let TokenAddress = "0x217c132171845A65A40e612A0A28C915a84214b4";
+      let ERC20Contract = WETH9__factory.connect(TokenAddress, EOA);
+      console.log(`WETH: ${await ERC20Contract.balanceOf(SmartWallet)}`);
+
+      let destination = await rlInterface.questionAsync(
+        "Who do you want to send WETH to: 👨🏻‍💻🧑🏻‍💻   "
+      );
+      let _to = users.filter(
+        (user) => user.name.toLowerCase() === destination.toLowerCase()
+      )[0].wallet;
+      let amount = await rlInterface.questionAsync(
+        "How much do you want to send:  💰    "
+      );
+      const chainId = await (await ethers.provider.getNetwork()).chainId;
+      const nonce = await EIP4337Lib.Utils.getNonce(
+        SmartWallet,
+        ethers.provider
+      );
+
+      const sendWETH = await EIP4337Lib.Tokens.ERC20.transfer(
+        ethers.provider,
+        SmartWallet,
+        nonce,
+        EntryPointAddress,
+        PaymasterAddress,
+        ethers.utils
+          .parseUnits(mockGasFee.high.suggestedMaxFeePerGas, "gwei")
+          .toString(),
+        ethers.utils
+          .parseUnits(mockGasFee.high.suggestedMaxPriorityFeePerGas, "gwei")
+          .toString(),
+        TokenAddress,
+        _to,
+        amount
+      );
+      if (!sendWETH) {
+        throw new Error("sendWETH is null");
+      }
+      const userOpHash = sendWETH.getUserOpHash(EntryPointAddress, chainId);
+      sendWETH.signWithSignature(
+        walletOwner,
+        Utils.signMessage(userOpHash, walletOwnerPrivateKey)
+      );
+
+      await EIP4337Lib.RPC.simulateHandleOp(
+        ethers.provider,
+        EntryPointAddress,
+        sendWETH
+      );
+      console.log(`You will send ${amount} USDC to ${_to}`);
+      let confirmation = await rlInterface.questionAsync(
+        "Confirm to add to queue: (Y/N)    "
+      );
+      if (confirmation.toLowerCase() === "y") {
+        let tx = {
+          to: _to,
+          amount: amount,
+          tx: sendWETH,
+        };
+        transactions.push(tx);
+      } else if (confirmation.toLowerCase() === "n") {
+        console.log("Transaccion disccard ❌");
+      }
+    } else if (menu === "4") {
+      console.log(
+        "---------------------- 💰 BALANCE 💰 --------------------------"
+      );
+      let TokenAddress = "0x8337A008949C0e6F3D8ac5cE6956d4d17fcfCeC5";
+      let ERC721Contract = WETH9__factory.connect(TokenAddress, EOA);
+      console.log(
+        `You have ${await ERC721Contract.balanceOf(
+          SmartWallet
+        )} NFT in this collection`
+      );
+      let destination = await rlInterface.questionAsync(
+        "Who do you want to send the NFT to: 👨🏻‍💻🧑🏻‍💻   "
+      );
+      let _to = users.filter(
+        (user) => user.name.toLowerCase() === destination.toLowerCase()
+      )[0].wallet;
+      let id = await rlInterface.questionAsync("Select the NFT Id: 🖼️     ");
+      const chainId = await (await ethers.provider.getNetwork()).chainId;
+      const nonce = await EIP4337Lib.Utils.getNonce(
+        SmartWallet,
+        ethers.provider
+      );
+
+      const sendNFT = await EIP4337Lib.Tokens.ERC721.transferFrom(
+        ethers.provider,
+        SmartWallet,
+        nonce,
+        EntryPointAddress,
+        PaymasterAddress,
+        ethers.utils
+          .parseUnits(mockGasFee.high.suggestedMaxFeePerGas, "gwei")
+          .toString(),
+        ethers.utils
+          .parseUnits(mockGasFee.high.suggestedMaxPriorityFeePerGas, "gwei")
+          .toString(),
+        TokenAddress,
+        SmartWallet,
+        _to,
+        id
+      );
+      if (!sendNFT) {
+        throw new Error("sendNFT is null");
+      }
+      const userOpHash = sendNFT.getUserOpHash(EntryPointAddress, chainId);
+      sendNFT.signWithSignature(
+        walletOwner,
+        Utils.signMessage(userOpHash, walletOwnerPrivateKey)
+      );
+      await EIP4337Lib.RPC.simulateHandleOp(
+        ethers.provider,
+        EntryPointAddress,
+        sendNFT
+      );
+      console.log(`You will send NFT n° ${id} to ${_to}`);
+      let confirmation = await rlInterface.questionAsync(
+        "Confirm to add to queue: (Y/N)    "
+      );
+      if (confirmation.toLowerCase() === "y") {
+        let tx = {
+          to: _to,
+          amount: id,
+          tx: sendNFT,
+        };
+        transactions.push(tx);
+      } else if (confirmation.toLowerCase() === "n") {
+        console.log("Transaccion disccard ❌");
+      }
     }
-    const userOpHash = sendMATIC.getUserOpHash(EntryPointAddress, chainId);
-    sendMATIC.signWithSignature(
-      walletOwner,
-      Utils.signMessage(userOpHash, walletOwnerPrivateKey)
-    );
-    await EIP4337Lib.RPC.simulateHandleOp(
-      ethers.provider,
-      EntryPointAddress,
-      sendMATIC
-    );
-    const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
-    console.log(sendMATIC);
-    const re = await EntryPoint.handleOps([sendMATIC], SmartWallet);
-    console.log(re);
-    console.log(
-      `Transaction successful you now have ${await provider.getBalance(
-        SmartWallet
-      )} MATIC on your wallet  `
-    );
-
-    // #region Entrypoint
-
-    // if not deployed, deploy
-  } else if (menu === "2") {
-    let TokenAddress = "0x164C681FB5eA009508B49230db7d47749206C16A";
-    console.log(
-      "---------------------- 💰 BALANCE 💰 --------------------------"
-    );
-    let ERC20Contract = WETH9__factory.connect(TokenAddress, EOA);
-    console.log(`USDC: ${await ERC20Contract.balanceOf(SmartWallet)}`);
-    let destination = await rlInterface.questionAsync(
-      "Who do you want to send USDC to:👨🏻‍💻🧑🏻‍💻    "
-    );
-    let _to = users.filter(
-      (user) => user.name.toLowerCase() === destination.toLowerCase()
-    )[0].wallet;
-    let amount = await rlInterface.questionAsync(
-      "How much do you want to send: 💰  "
-    );
-    const chainId = await (await ethers.provider.getNetwork()).chainId;
-    const nonce = await EIP4337Lib.Utils.getNonce(SmartWallet, ethers.provider);
-
-    const sendUSDC = await EIP4337Lib.Tokens.ERC20.transfer(
-      ethers.provider,
-      SmartWallet,
-      nonce,
-      EntryPointAddress,
-      PaymasterAddress,
-      ethers.utils
-        .parseUnits(mockGasFee.medium.suggestedMaxFeePerGas, "gwei")
-        .toString(),
-      ethers.utils
-        .parseUnits(mockGasFee.medium.suggestedMaxPriorityFeePerGas, "gwei")
-        .toString(),
-      TokenAddress,
-      _to,
-      amount
-    );
-    if (!sendUSDC) {
-      throw new Error("sendUSDC is null");
-    }
-    const userOpHash = sendUSDC.getUserOpHash(EntryPointAddress, chainId);
-    sendUSDC.signWithSignature(
-      walletOwner,
-      Utils.signMessage(userOpHash, walletOwnerPrivateKey)
-    );
-    await EIP4337Lib.RPC.simulateHandleOp(
-      ethers.provider,
-      EntryPointAddress,
-      sendUSDC
-    );
-    const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
-    console.log(sendUSDC);
-    const re = await EntryPoint.handleOps([sendUSDC], SmartWallet);
-    console.log(re);
-    console.log(
-      `Transaction successful you now have ${await (
-        await ERC20Contract.balanceOf(SmartWallet)
-      ).sub(amount)} USDC on your wallet  `
-    );
-  } else if (menu === "3") {
-    console.log(
-      "---------------------- 💰 BALANCE 💰 --------------------------"
-    );
-    let TokenAddress = "0x217c132171845A65A40e612A0A28C915a84214b4";
-    let ERC20Contract = WETH9__factory.connect(TokenAddress, EOA);
-    console.log(`WETH: ${await ERC20Contract.balanceOf(SmartWallet)}`);
-
-    let destination = await rlInterface.questionAsync(
-      "Who do you want to send WETH to: 👨🏻‍💻🧑🏻‍💻   "
-    );
-    let _to = users.filter(
-      (user) => user.name.toLowerCase() === destination.toLowerCase()
-    )[0].wallet;
-    let amount = await rlInterface.questionAsync(
-      "How much do you want to send:  💰    "
-    );
-    const chainId = await (await ethers.provider.getNetwork()).chainId;
-    const nonce = await EIP4337Lib.Utils.getNonce(SmartWallet, ethers.provider);
-
-    const sendWETH = await EIP4337Lib.Tokens.ERC20.transfer(
-      ethers.provider,
-      SmartWallet,
-      nonce,
-      EntryPointAddress,
-      PaymasterAddress,
-      ethers.utils
-        .parseUnits(mockGasFee.medium.suggestedMaxFeePerGas, "gwei")
-        .toString(),
-      ethers.utils
-        .parseUnits(mockGasFee.medium.suggestedMaxPriorityFeePerGas, "gwei")
-        .toString(),
-      TokenAddress,
-      _to,
-      amount
-    );
-    if (!sendWETH) {
-      throw new Error("sendWETH is null");
-    }
-    const userOpHash = sendWETH.getUserOpHash(EntryPointAddress, chainId);
-    sendWETH.signWithSignature(
-      walletOwner,
-      Utils.signMessage(userOpHash, walletOwnerPrivateKey)
-    );
-    await EIP4337Lib.RPC.simulateHandleOp(
-      ethers.provider,
-      EntryPointAddress,
-      sendWETH
-    );
-    const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
-    console.log(sendWETH);
-    const re = await EntryPoint.handleOps([sendWETH], SmartWallet);
-    console.log(re);
-    console.log(
-      `Transaction successful you now have ${await ERC20Contract.balanceOf(
-        SmartWallet
-      )} WETH on your wallet  `
-    );
-  } else if (menu === "4") {
-    console.log(
-      "---------------------- 💰 BALANCE 💰 --------------------------"
-    );
-    let TokenAddress = "0x8337A008949C0e6F3D8ac5cE6956d4d17fcfCeC5";
-    let ERC721Contract = WETH9__factory.connect(TokenAddress, EOA);
-    console.log(
-      `You have ${await ERC721Contract.balanceOf(
-        SmartWallet
-      )} NFT in this collection`
-    );
-    let destination = await rlInterface.questionAsync(
-      "Who do you want to send the NFT to: 👨🏻‍💻🧑🏻‍💻   "
-    );
-    let _to = users.filter(
-      (user) => user.name.toLowerCase() === destination.toLowerCase()
-    )[0].wallet;
-    let id = await rlInterface.questionAsync("Select the NFT Id: 🖼️     ");
-    const chainId = await (await ethers.provider.getNetwork()).chainId;
-    const nonce = await EIP4337Lib.Utils.getNonce(SmartWallet, ethers.provider);
-
-    const sendNFT = await EIP4337Lib.Tokens.ERC721.transferFrom(
-      ethers.provider,
-      SmartWallet,
-      nonce,
-      EntryPointAddress,
-      PaymasterAddress,
-      ethers.utils
-        .parseUnits(mockGasFee.medium.suggestedMaxFeePerGas, "gwei")
-        .toString(),
-      ethers.utils
-        .parseUnits(mockGasFee.medium.suggestedMaxPriorityFeePerGas, "gwei")
-        .toString(),
-      TokenAddress,
-      SmartWallet,
-      _to,
-      id
-    );
-    if (!sendNFT) {
-      throw new Error("sendNFT is null");
-    }
-    const userOpHash = sendNFT.getUserOpHash(EntryPointAddress, chainId);
-    sendNFT.signWithSignature(
-      walletOwner,
-      Utils.signMessage(userOpHash, walletOwnerPrivateKey)
-    );
-    await EIP4337Lib.RPC.simulateHandleOp(
-      ethers.provider,
-      EntryPointAddress,
-      sendNFT
-    );
-    const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
-    console.log(sendNFT);
-    const re = await EntryPoint.handleOps([sendNFT], SmartWallet);
-    console.log(re);
-    console.log(
-      `Transaction successful you now have ${await ERC721Contract.balanceOf(
-        SmartWallet
-      )} NFT in this collection  `
-    );
   }
-  process.exit;
+  let finalConfirmation = await rlInterface.questionAsync(
+    `\n Confirm that you wanto to send:  \n ${transactions.length} transfers  (Y/N):    `
+  );
+  if (finalConfirmation.toLowerCase() === "y") {
+    let userOp = transactions.map((tx) => tx.tx);
+    console.log(userOp);
+    const EntryPoint = EntryPoint__factory.connect(EntryPointAddress, EOA);
+
+    const re = await EntryPoint.handleOps(userOp, EOA.address);
+    console.log(re);
+    console.log(`Transactions completed`);
+  } else {
+    console.log("Transactions dicard ❌");
+  }
   // #endregion GuardianLogic
 }
 

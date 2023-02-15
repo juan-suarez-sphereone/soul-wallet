@@ -32,15 +32,15 @@ async function main() {
   let EOA = (await ethers.getSigners())[0];
   console.log("EOA Address: ", EOA.address);
 
-  if (network.name === "mumbai") {
-    create2Factory = "0x4593E032481bf78A7462822B4b279306989cfD36";
+  if (network.name === "mumbai" || network.name === "goerli") {
+    create2Factory = "0x17383736805faC95E075f77CFfDA41BAEBB55533"; //mumbai and goerli create2factory
   }
 
   if (!create2Factory) {
     throw new Error("create2Factory not set");
   }
 
-  const salt = hexZeroPad(hexlify(90), 32);
+  const salt = hexZeroPad(hexlify(0), 32);
 
   // #region Entrypoint
 
@@ -203,3 +203,14 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+//Mumbai
+//EntryPointAddress: 0x67B2E1091b18ee967339d8A59bAb7b9423B45947
+//WalletLogicAddress: 0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e
+//GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5
+//
+//Goerli
+//EntryPointAddress: 0x67B2E1091b18ee967339d8A59bAb7b9423B45947
+//WalletLogicAddress: 0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e
+//GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5
+//

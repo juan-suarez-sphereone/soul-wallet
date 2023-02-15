@@ -8,11 +8,43 @@
  */
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+require("@nomiclabs/hardhat-ethers");
+const { createAlchemyWeb3 } = require("@alch/alchemy-web3");
+const { task } = require("hardhat/config");
 import dotenv from "dotenv";
 dotenv.config();
 const MUMBAI_PRIVATE_KEY = process.env.MUMBAI_PRIVATE_KEY; // test private key
 const MAINNET_PRIVATE_KEY = process.env.MAINNET_PRIVATE_KEY;
 
+task(
+  "account",
+  "returns nonce and balance for specified address on multiple networks"
+)
+  .addParam("address")
+  .setAction(async (address: any) => {
+    const web3Goerli = createAlchemyWeb3(process.env.GOERLI_API);
+    const web3Mumbai = createAlchemyWeb3(process.env.MUMBAI_API);
+
+    const networkIDArr = ["Ethereum Goerli:", "Polygon  Mumbai:"];
+    const providerArr = [web3Goerli, web3Mumbai];
+    const resultArr = [];
+
+    for (let i = 0; i < providerArr.length; i++) {
+      const nonce = await providerArr[i].eth.getTransactionCount(
+        address.address,
+        "latest"
+      );
+      const balance = await providerArr[i].eth.getBalance(address.address);
+      resultArr.push([
+        networkIDArr[i],
+        nonce,
+        parseFloat(providerArr[i].utils.fromWei(balance, "ether")).toFixed(2) +
+          "ETH",
+      ]);
+    }
+    resultArr.unshift(["  |NETWORK|   |NONCE|   |BALANCE|  "]);
+    console.log(resultArr);
+  });
 /** @type import('hardhat/config').HardhatUserConfig */
 const config: HardhatUserConfig = {
   solidity: {
@@ -56,14 +88,14 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
     },
     mumbai: {
-      url: process.env.MATIC_MUMBAI_PROVIDER || "",
+      url: process.env.MUMBAI_API || "",
       accounts: [MUMBAI_PRIVATE_KEY],
       gasPrice: "auto",
       timeout: 1000000,
     },
-    mainnet: {
+    goerli: {
       url: process.env.ETH_MAINNET_PROVIDER || "",
-      accounts: [MAINNET_PRIVATE_KEY],
+      accounts: [MUMBAI_PRIVATE_KEY],
       gasPrice: "auto",
       timeout: 1000000,
     },
@@ -71,6 +103,7 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: {
       polygonMumbai: "88IYFKQV8S4AJCQ3AFKG21E9UP8XMVJS8N",
+      goerli: "ERP1M93PMBJFJ4DCAZZ4PNU7VCVNJWKZIB",
     },
   },
   paths: {

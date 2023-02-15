@@ -1,23 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0
-
 pragma solidity ^0.8.17;
-
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./EntryPoint.sol";
 import "./BasePaymaster.sol";
-
 /**
  * Paymaster that accepts WETH tokens as payment.
  * The paymaster must be approved to transfer tokens from the user wallet.
  */
 contract WETHTokenPaymaster is BasePaymaster {
     //calculated cost of the postOp
-    uint256 constant COST_OF_POST = 20000;
-
+    uint256 constant COST_OF_POST = 35000;
     using UserOperationLib for UserOperation;
     IERC20 public WETHToken;
     mapping(bytes32 => bool) public KnownWallets;
-
     constructor(
         EntryPoint _entryPoint,
         IERC20 _WETHToken,
@@ -26,21 +21,19 @@ contract WETHTokenPaymaster is BasePaymaster {
         WETHToken = _WETHToken;
         _transferOwnership(_owner);
     }
-
+    //Event paid fees
+    event feesPaid (uint256 amount, address beneficiary);
     function addWallet(bytes32 walletCodeHash) public onlyOwner {
         KnownWallets[walletCodeHash] = true;
     }
-
     function removeWallet(bytes32 walletCodeHash) public onlyOwner {
         delete KnownWallets[walletCodeHash];
     }
-
     function withdraw(address payable to) public onlyOwner {
         uint256 balance = WETHToken.balanceOf(address(this));
         require(balance >= 0, "not enough balance");
         WETHToken.transfer(to, balance);
     }
-
     /**
      * validate the request:
      * if this is a constructor call, make sure it is a known account (that is, a contract that
@@ -57,9 +50,7 @@ contract WETHTokenPaymaster is BasePaymaster {
             userOp.verificationGasLimit > 45000,
             "WETH-TokenPaymaster: gas too low for postOp"
         );
-
         address sender = userOp.getSender();
-
         if (userOp.initCode.length != 0) {
             _validateConstructor(userOp);
         } else {
@@ -68,15 +59,12 @@ contract WETHTokenPaymaster is BasePaymaster {
                 "WETH-TokenPaymaster: not enough allowance"
             );
         }
-
         require(
             WETHToken.balanceOf(sender) >= requiredPreFund,
             "WETH-TokenPaymaster: not enough balance"
         );
-
         return (abi.encode(userOp.sender, userOp.gasPrice()), 0);
     }
-
     // when constructing a wallet, validate constructor code and parameters
     function _validateConstructor(
         UserOperation calldata userOp
@@ -94,14 +82,12 @@ contract WETHTokenPaymaster is BasePaymaster {
             userOp.initCode[0:userOp.initCode.length -
                 270] /* (32*7)+46=270  46 is fixed in current parameter encode */
         );
-
         // no check on POC
         (bytecodeHash);
         // require(
         //     KnownWallets[bytecodeHash],
         //     "TokenPaymaster: unknown wallet constructor"
         // );
-
         // first param (of 7) should be our entryPoint
         bytes32 entryPointParam = bytes32(
             userOp.initCode[userOp.initCode.length - 270:]
@@ -110,7 +96,6 @@ contract WETHTokenPaymaster is BasePaymaster {
             address(uint160(uint256(entryPointParam))) == address(entryPoint),
             "wrong paymaster in constructor"
         );
-
         //the 6th parameter is WETH token
         bytes32 tokenParam = bytes32(
             userOp.initCode[userOp.initCode.length - 110:] /* 64+46=110 */
@@ -119,7 +104,6 @@ contract WETHTokenPaymaster is BasePaymaster {
             address(uint160(uint256(tokenParam))) == address(WETHToken),
             "wrong token in constructor"
         );
-
         //the 7th parameter is this paymaster
         bytes32 paymasterParam = bytes32(
             userOp.initCode[userOp.initCode.length - 78:] /* 32+46=78 */
@@ -129,7 +113,6 @@ contract WETHTokenPaymaster is BasePaymaster {
             "wrong paymaster in constructor"
         );
     }
-
     //actual charge of user.
     // this method will be called just after the user's TX with mode==OpSucceeded|OpReverted.
     // BUT: if the user changed its balance in a way that will cause  postOp to revert, then it gets called again, after reverting
@@ -145,10 +128,8 @@ contract WETHTokenPaymaster is BasePaymaster {
             (address, uint256)
         );
         //actualGasCost is known to be no larger than the above requiredPreFund, so the transfer should succeed.
-        WETHToken.transferFrom(
-            sender,
-            address(this),
-            actualGasCost + (COST_OF_POST * gasPrice)
-        );
+        uint256 amount =  actualGasCost + (COST_OF_POST * gasPrice);
+    
+        emit feesPaid (amount, sender);
     }
 }
