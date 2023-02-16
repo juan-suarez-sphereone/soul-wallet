@@ -56,17 +56,12 @@ async function main() {
     priorityFeeTrend: "level",
     baseFeeTrend: "down",
   };
-  let create2Factory = "";
-  let WETHContractAddress = "";
+  let create2Factory = "0x17383736805faC95E075f77CFfDA41BAEBB55533";
+  let WETHContractAddress = "0x03e2Ca7e7047c5A8d487B5a961ad4C5C0140d8D9";
   let EOA = (await ethers.getSigners())[0];
-  let WalletLogicAddress = "0xd5f85154392a6b4D6f39C6761BbBA028484b5316";
-  let EntryPointAddress = "0xa40CBE24Bfe961b759FE8549040d5c80d56400e6";
-  let WETHTokenPaymasterAddress = "0xE56CE953F65f14d9D09A19aC804665549D55F2D3";
-
-  if (network.name === "mumbai") {
-    create2Factory = "0x4593E032481bf78A7462822B4b279306989cfD36";
-    WETHContractAddress = "0x217c132171845A65A40e612A0A28C915a84214b4";
-  }
+  let WalletLogicAddress = "0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e";
+  let EntryPointAddress = "0x67B2E1091b18ee967339d8A59bAb7b9423B45947";
+  let WETHTokenPaymasterAddress = "0xFb023d1b3cCF1934924cd6B38E0EbB2acb2fF563";
 
   if (!create2Factory) {
     throw new Error("create2Factory not set");
@@ -79,6 +74,21 @@ async function main() {
 
   const walletOwner = EOA.address;
   const walletOwnerPrivateKey = "0x" + [process.env.MUMBAI_PRIVATE_KEY];
+  // const _paymasterStake = "" + Math.pow(12, 15);
+  // const WETHPaymaster = await WETHTokenPaymaster__factory.connect(
+  //   WETHTokenPaymasterAddress,
+  //   EOA
+  // );
+  // console.log(await WETHPaymaster.owner());
+  // console.log("adding stake");
+  // await WETHPaymaster.addStake(12, {
+  //   from: EOA.address,
+  //   value: _paymasterStake,
+  // });
+  // await WETHPaymaster.deposit({
+  //   from: EOA.address,
+  //   value: _paymasterStake,
+  // });
 
   // #region deploy wallet
 
@@ -91,25 +101,25 @@ async function main() {
     upgradeDelay,
     guardianDelay,
     EIP4337Lib.Defines.AddressZero,
-    EIP4337Lib.Defines.AddressZero,
-    EIP4337Lib.Defines.AddressZero,
-    19,
+    WETHContractAddress,
+    WETHTokenPaymasterAddress,
+    0,
     create2Factory
   );
 
   console.log("walletAddress: " + walletAddress);
 
   // send 0.002 WETH to wallet
+
   const WETHContract = WETH9__factory.connect(WETHContractAddress, EOA);
   const _b = await WETHContract.balanceOf(walletAddress);
-
-  console.log("sending 0.001 MATIC to wallet");
-  let tx = await EOA.sendTransaction({
-    to: walletAddress,
-    value: ethers.utils.parseEther("0.001"),
-  });
-  tx.wait();
-  console.log(tx);
+  console.log(_b);
+  // console.log("sending 0.02 WETH to wallet");
+  // await WETHContract.transferFrom(
+  //   EOA.address,
+  //   walletAddress,
+  //   ethers.utils.parseEther("0.02")
+  // );
 
   // check if wallet is activated (deployed)
   const code = await ethers.provider.getCode(walletAddress);
@@ -132,9 +142,9 @@ async function main() {
       upgradeDelay,
       guardianDelay,
       EIP4337Lib.Defines.AddressZero,
-      EIP4337Lib.Defines.AddressZero,
-      EIP4337Lib.Defines.AddressZero,
-      19,
+      WETHContractAddress,
+      WETHTokenPaymasterAddress,
+      0,
       create2Factory,
       ethers.utils
         .parseUnits(mockGasFee.medium.suggestedMaxFeePerGas, "gwei")
@@ -176,3 +186,18 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+//Common Create2Factory "0x17383736805faC95E075f77CFfDA41BAEBB55533"
+//Common WETH Token "0x03e2Ca7e7047c5A8d487B5a961ad4C5C0140d8D9"
+//Mumbai
+//EntryPointAddress: 0x67B2E1091b18ee967339d8A59bAb7b9423B45947
+//WalletLogicAddress: 0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e
+//GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5
+//WETHTokenPaymasterAddress: 0x2aE9dCD2d24A066E534f53A59C8e93d58E959E6b
+//SmartWallet: 0x8020dbB437D720437FDBc0ba5498e1ffB615E8Ab
+//Goerli
+//EntryPointAddress: 0x67B2E1091b18ee967339d8A59bAb7b9423B45947
+//WalletLogicAddress: 0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e
+//GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5
+//WETHTokenPaymasterAddress: 0x2aE9dCD2d24A066E534f53A59C8e93d58E959E6b
+//SmartWallet: 0x8020dbB437D720437FDBc0ba5498e1ffB615E8Ab

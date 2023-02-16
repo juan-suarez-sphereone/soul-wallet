@@ -32,12 +32,12 @@ async function main() {
 
   let create2Factory = "";
   let WETHContractAddress = "";
-  let EntryPointAddress = "0xe683550A3D0605c95D586044C77eb9e3B7E947a6";
+  let EntryPointAddress = "0x67B2E1091b18ee967339d8A59bAb7b9423B45947";
   let EOA = (await ethers.getSigners())[0];
 
-  if (network.name === "mumbai") {
-    create2Factory = "0x4593E032481bf78A7462822B4b279306989cfD36";
-    WETHContractAddress = "0x164C681FB5eA009508B49230db7d47749206C16A";
+  if (network.name === "mumbai" || network.name === "goerli") {
+    create2Factory = "0x17383736805faC95E075f77CFfDA41BAEBB55533"; //mumbai and goerli create2factory
+    WETHContractAddress = "0x03e2Ca7e7047c5A8d487B5a961ad4C5C0140d8D9"; //WETH contract deployed on goerli and mumbai
   }
 
   if (!create2Factory) {
@@ -52,7 +52,7 @@ async function main() {
   // #region WETHPaymaster
 
   const WETHTokenPaymasterFactory = await ethers.getContractFactory(
-    "WETHTokenPaymasterFee"
+    "WETHTokenPaymaster"
   );
   const WETHTokenPaymasterBytecode =
     WETHTokenPaymasterFactory.getDeployTransaction(
@@ -98,7 +98,7 @@ async function main() {
       await new Promise((r) => setTimeout(r, 6000));
     }
     {
-      const _paymasterStake = "" + Math.pow(12, 18);
+      const _paymasterStake = "" + Math.pow(12, 14);
       const WETHPaymaster = await WETHTokenPaymaster__factory.connect(
         WETHTokenPaymasterAddress,
         EOA
@@ -129,6 +129,21 @@ async function main() {
       console.log("WETHTokenPaymaster verify failed:", error);
     }
   } else {
+    const _paymasterStake = "" + Math.pow(12, 10);
+    const WETHPaymaster = await WETHTokenPaymaster__factory.connect(
+      WETHTokenPaymasterAddress,
+      EOA
+    );
+    console.log(await WETHPaymaster.owner());
+    console.log("adding stake");
+    await WETHPaymaster.addStake(12, {
+      from: EOA.address,
+      value: _paymasterStake,
+    });
+    await WETHPaymaster.deposit({
+      from: EOA.address,
+      value: _paymasterStake,
+    });
   }
   // #endregion WETHPaymaster
 }
@@ -139,3 +154,14 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+//Mumbai
+//EntryPointAddress: 0x67B2E1091b18ee967339d8A59bAb7b9423B45947
+//WalletLogicAddress: 0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e
+//GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5
+//WETHTokenPaymasterAddress: 0xFb023d1b3cCF1934924cd6B38E0EbB2acb2fF563
+//Goerli
+//EntryPointAddress: 0x67B2E1091b18ee967339d8A59bAb7b9423B45947
+//WalletLogicAddress: 0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e
+//GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5
+//WETHTokenPaymasterAddress: 0xFb023d1b3cCF1934924cd6B38E0EbB2acb2fF563
