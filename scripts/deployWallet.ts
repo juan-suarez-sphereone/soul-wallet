@@ -74,7 +74,7 @@ async function main() {
 
   const walletOwner = EOA.address;
   const walletOwnerPrivateKey = "0x" + [process.env.MUMBAI_PRIVATE_KEY];
-  // const _paymasterStake = "" + Math.pow(12, 15);
+  // const _paymasterStake = "50000000000000000";
   // const WETHPaymaster = await WETHTokenPaymaster__factory.connect(
   //   WETHTokenPaymasterAddress,
   //   EOA
@@ -103,7 +103,7 @@ async function main() {
     EIP4337Lib.Defines.AddressZero,
     WETHContractAddress,
     WETHTokenPaymasterAddress,
-    0,
+    1,
     create2Factory
   );
 
@@ -114,11 +114,11 @@ async function main() {
   const WETHContract = WETH9__factory.connect(WETHContractAddress, EOA);
   const _b = await WETHContract.balanceOf(walletAddress);
   console.log(_b);
-  // console.log("sending 0.02 WETH to wallet");
+  // console.log("sending 0.01 WETH to wallet");
   // await WETHContract.transferFrom(
   //   EOA.address,
   //   walletAddress,
-  //   ethers.utils.parseEther("0.02")
+  //   ethers.utils.parseEther("0.01")
   // );
 
   // check if wallet is activated (deployed)
@@ -144,7 +144,7 @@ async function main() {
       EIP4337Lib.Defines.AddressZero,
       WETHContractAddress,
       WETHTokenPaymasterAddress,
-      0,
+      1,
       create2Factory,
       ethers.utils
         .parseUnits(mockGasFee.medium.suggestedMaxFeePerGas, "gwei")
@@ -169,14 +169,7 @@ async function main() {
     const re = await EntryPoint.handleOps([activateOp], EOA.address);
     console.log(re);
   }
-  const paymasterContract = WETHTokenPaymaster__factory.connect(
-    WETHTokenPaymasterAddress,
-    EOA
-  );
-  const smartWalletCodeHash = keccak256(walletAddress);
-  console.log(smartWalletCodeHash);
-  const addWallet = await paymasterContract.addWallet(smartWalletCodeHash);
-  console.log(addWallet);
+
   // #endregion deploy wallet
 }
 
@@ -195,9 +188,17 @@ main().catch((error) => {
 //GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5
 //WETHTokenPaymasterAddress: 0x2aE9dCD2d24A066E534f53A59C8e93d58E959E6b
 //SmartWallet: 0x8020dbB437D720437FDBc0ba5498e1ffB615E8Ab
+//SmartWallet2:0x5349A206F2048663cbA58cA971F98B3b712d7904
+//SmartWalletCoti:0x03382278bEd4215ba21Eb2F20293aDe537501D55
 //Goerli
 //EntryPointAddress: 0x67B2E1091b18ee967339d8A59bAb7b9423B45947
 //WalletLogicAddress: 0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e
 //GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5
 //WETHTokenPaymasterAddress: 0x2aE9dCD2d24A066E534f53A59C8e93d58E959E6b
 //SmartWallet: 0x8020dbB437D720437FDBc0ba5498e1ffB615E8Ab
+//SmartWallet2:0x5349A206F2048663cbA58cA971F98B3b712d7904
+//SmartWalletCoti: 0x03382278bEd4215ba21Eb2F20293aDe537501D55
+//Arbitrium
+//EntryPointAddress: 0x67B2E1091b18ee967339d8A59bAb7b9423B45947
+//WalletLogicAddress: 0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e
+//GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5

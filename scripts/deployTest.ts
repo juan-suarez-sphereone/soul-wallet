@@ -40,12 +40,9 @@ const rlInterface = readline.createInterface({
 // }
 // readFile("texto.txt");
 let users = [
-  { name: "Juan", wallet: "0xffe367d89bEb0c2Fb9088c0949d717270CcBC831" }, //12
-  { name: "Mati", wallet: "0x1F72e1D63b4940e4d44a16d6dF5A64c71860CA54" }, // 14
-  { name: "Tincho", wallet: "0xdC7359023D0B8d6B59112aB53984dD95a40791C2" }, //10
-  { name: "Diego", wallet: "0x06813E67bD5867e5DfB75F5BDF903fD0c648E892" }, // 11
-  { name: "Coti", wallet: "0x8F1D1867B7DBf9CE0d8FD5D593127C13662E3b45" }, //13
-  { name: "Falopa", wallet: "0x19DE93376a2aA863365a3c030596E112B1e4A649" },
+  { name: "Juan", wallet: "0x8020dbB437D720437FDBc0ba5498e1ffB615E8Ab" }, //12
+  { name: "Mati", wallet: "0x5349A206F2048663cbA58cA971F98B3b712d7904" }, // 14// 11
+  { name: "Coti", wallet: "0x03382278bEd4215ba21Eb2F20293aDe537501D55" }, //13
 ];
 
 async function main() {
@@ -85,12 +82,12 @@ async function main() {
   let transactions = [];
   const walletOwner = EOA.address;
   const walletOwnerPrivateKey = "0x" + [process.env.MUMBAI_PRIVATE_KEY];
-  let EntryPointAddress = "0xa40CBE24Bfe961b759FE8549040d5c80d56400e6";
-  let PaymasterAddress = "0xE56CE953F65f14d9D09A19aC804665549D55F2D3";
+  let EntryPointAddress = "0x67B2E1091b18ee967339d8A59bAb7b9423B45947";
+  let PaymasterAddress = "0x2aE9dCD2d24A066E534f53A59C8e93d58E959E6b";
   let SmartWallet = "";
   let menu = "";
 
-  while (menu !== "6") {
+  while (menu !== "5") {
     let username = await rlInterface.questionAsync(
       "Please enter you user name:  "
     );
@@ -248,7 +245,7 @@ async function main() {
       console.log(
         "---------------------- 💰 BALANCE 💰 --------------------------"
       );
-      let TokenAddress = "0x217c132171845A65A40e612A0A28C915a84214b4";
+      let TokenAddress = "0x03e2Ca7e7047c5A8d487B5a961ad4C5C0140d8D9";
       let ERC20Contract = WETH9__factory.connect(TokenAddress, EOA);
       console.log(`WETH: ${await ERC20Contract.balanceOf(SmartWallet)}`);
 
@@ -404,3 +401,22 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+//Common Create2Factory "0x17383736805faC95E075f77CFfDA41BAEBB55533"
+//Common WETH Token "0x03e2Ca7e7047c5A8d487B5a961ad4C5C0140d8D9"
+//Mumbai
+//EntryPointAddress: 0x67B2E1091b18ee967339d8A59bAb7b9423B45947
+//WalletLogicAddress: 0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e
+//GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5
+//WETHTokenPaymasterAddress: 0x2aE9dCD2d24A066E534f53A59C8e93d58E959E6b
+//SmartWallet: 0x8020dbB437D720437FDBc0ba5498e1ffB615E8Ab
+//SmartWallet2:0x5349A206F2048663cbA58cA971F98B3b712d7904
+//SmartWalletCoti:0x03382278bEd4215ba21Eb2F20293aDe537501D55
+//Goerli
+//EntryPointAddress: 0x67B2E1091b18ee967339d8A59bAb7b9423B45947
+//WalletLogicAddress: 0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e
+//GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5
+//WETHTokenPaymasterAddress: 0x2aE9dCD2d24A066E534f53A59C8e93d58E959E6b
+//SmartWallet: 0x8020dbB437D720437FDBc0ba5498e1ffB615E8Ab
+//SmartWallet2:0x5349A206F2048663cbA58cA971F98B3b712d7904
+//SmartWalletCoti: 0x03382278bEd4215ba21Eb2F20293aDe537501D55

@@ -35,10 +35,8 @@ async function main() {
   let EntryPointAddress = "0x67B2E1091b18ee967339d8A59bAb7b9423B45947";
   let EOA = (await ethers.getSigners())[0];
 
-  if (network.name === "mumbai" || network.name === "goerli") {
-    create2Factory = "0x17383736805faC95E075f77CFfDA41BAEBB55533"; //mumbai and goerli create2factory
-    WETHContractAddress = "0x03e2Ca7e7047c5A8d487B5a961ad4C5C0140d8D9"; //WETH contract deployed on goerli and mumbai
-  }
+  create2Factory = "0x17383736805faC95E075f77CFfDA41BAEBB55533"; //mumbai and goerli create2factory
+  WETHContractAddress = "0x03e2Ca7e7047c5A8d487B5a961ad4C5C0140d8D9"; //WETH contract deployed on goerli and mumbai
 
   if (!create2Factory) {
     throw new Error("create2Factory not set");
@@ -74,7 +72,7 @@ async function main() {
   if ((await ethers.provider.getCode(WETHTokenPaymasterAddress)) === "0x") {
     console.log("WETHTokenPaymaster not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
-      return ethers.BigNumber.from(Math.pow(10, 7) + "");
+      return ethers.BigNumber.from(Math.pow(10, 8) + "");
       //return estimatedGasLimit.mul(10)  // 10x gas
     };
     const create2FactoryContract = Create2Factory__factory.connect(

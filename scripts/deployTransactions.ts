@@ -56,17 +56,12 @@ async function main() {
     priorityFeeTrend: "level",
     baseFeeTrend: "down",
   };
-  let create2Factory = "";
-  let WETHContractAddress = "";
+  let create2Factory = "0x17383736805faC95E075f77CFfDA41BAEBB55533";
+  let WETHContractAddress = "0x03e2Ca7e7047c5A8d487B5a961ad4C5C0140d8D9";
   let EOA = (await ethers.getSigners())[0];
-  let EntryPointAddress = "0xe683550A3D0605c95D586044C77eb9e3B7E947a6";
-  let WETHTokenPaymasterAddress = EIP4337Lib.Defines.AddressZero;
-  let walletAddress = "0x29245BA65003C4988b1cF2A07E8189d7cb1d1E8e";
-
-  if (network.name === "mumbai") {
-    create2Factory = "0x4593E032481bf78A7462822B4b279306989cfD36";
-    WETHContractAddress = "0x164c681fb5ea009508b49230db7d47749206c16a";
-  }
+  let EntryPointAddress = "0x67B2E1091b18ee967339d8A59bAb7b9423B45947";
+  let WETHTokenPaymasterAddress = "0x2aE9dCD2d24A066E534f53A59C8e93d58E959E6b";
+  let walletAddress = "0x8020dbB437D720437FDBc0ba5498e1ffB615E8Ab";
 
   if (!create2Factory) {
     throw new Error("create2Factory not set");
@@ -104,7 +99,7 @@ async function main() {
       .toString(),
     WETHContractAddress,
     EOA.address,
-    "200000000000000000"
+    "12345678"
   );
   if (!sendWETHOP) {
     throw new Error("sendWETHOP is null");
@@ -145,8 +140,10 @@ main().catch((error) => {
 //WalletLogicAddress: 0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e
 //GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5
 //WETHTokenPaymasterAddress: 0x2aE9dCD2d24A066E534f53A59C8e93d58E959E6b
+//SmartWallet: 0x8020dbB437D720437FDBc0ba5498e1ffB615E8Ab
 //Goerli
 //EntryPointAddress: 0x67B2E1091b18ee967339d8A59bAb7b9423B45947
 //WalletLogicAddress: 0xdf7F1e7b7935df644FCf9eb99A16B1554861da5e
 //GuardianLogicAddress: 0xF197e47472544848745c6DC62A2d40A2A78881F5
 //WETHTokenPaymasterAddress: 0x2aE9dCD2d24A066E534f53A59C8e93d58E959E6b
+//SmartWallet: 0x8020dbB437D720437FDBc0ba5498e1ffB615E8Ab

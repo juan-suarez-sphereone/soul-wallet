@@ -32,13 +32,7 @@ async function main() {
   let EOA = (await ethers.getSigners())[0];
   console.log("EOA Address: ", EOA.address);
 
-  if (network.name === "mumbai" || network.name === "goerli") {
-    create2Factory = "0x17383736805faC95E075f77CFfDA41BAEBB55533"; //mumbai and goerli create2factory
-  }
-
-  if (!create2Factory) {
-    throw new Error("create2Factory not set");
-  }
+  create2Factory = "0x17383736805faC95E075f77CFfDA41BAEBB55533"; //mumbai and goerli create2factory
 
   const salt = hexZeroPad(hexlify(0), 32);
 
@@ -60,7 +54,7 @@ async function main() {
   if ((await ethers.provider.getCode(EntryPointAddress)) === "0x") {
     console.log("EntryPoint not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
-      return ethers.BigNumber.from(Math.pow(10, 7) + "");
+      return ethers.BigNumber.from(Math.pow(10, 8) + "");
       //return estimatedGasLimit.mul(10)  // 10x gas
     };
     const create2FactoryContract = Create2Factory__factory.connect(
@@ -111,7 +105,7 @@ async function main() {
   if ((await ethers.provider.getCode(WalletLogicAddress)) === "0x") {
     console.log("WalletLogic not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
-      return ethers.BigNumber.from(Math.pow(10, 7) + "");
+      return ethers.BigNumber.from(Math.pow(10, 8) + "");
       //return estimatedGasLimit.mul(10)  // 10x gas
     };
     const create2FactoryContract = Create2Factory__factory.connect(
@@ -161,7 +155,7 @@ async function main() {
   if ((await ethers.provider.getCode(GuardianLogicAddress)) === "0x") {
     console.log("GuardianLogic not deployed, deploying...");
     const increaseGasLimit = (estimatedGasLimit: BigNumber) => {
-      return ethers.BigNumber.from(Math.pow(10, 7) + "");
+      return ethers.BigNumber.from(Math.pow(10, 8) + "");
       //return estimatedGasLimit.mul(10)  // 10x gas
     };
     const create2FactoryContract = Create2Factory__factory.connect(

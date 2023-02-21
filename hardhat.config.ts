@@ -24,9 +24,14 @@ task(
   .setAction(async (address: any) => {
     const web3Goerli = createAlchemyWeb3(process.env.GOERLI_API);
     const web3Mumbai = createAlchemyWeb3(process.env.MUMBAI_API);
+    const web3Arb = createAlchemyWeb3(process.env.ARBITRIUM_API);
 
-    const networkIDArr = ["Ethereum Goerli:", "Polygon  Mumbai:"];
-    const providerArr = [web3Goerli, web3Mumbai];
+    const networkIDArr = [
+      "Ethereum Goerli:",
+      "Polygon  Mumbai:",
+      "Arbitrium Goerli",
+    ];
+    const providerArr = [web3Goerli, web3Mumbai, web3Arb];
     const resultArr = [];
 
     for (let i = 0; i < providerArr.length; i++) {
@@ -99,11 +104,18 @@ const config: HardhatUserConfig = {
       gasPrice: "auto",
       timeout: 1000000,
     },
+    arbitrium: {
+      url: process.env.ARBITRIUM_API || "",
+      accounts: [MUMBAI_PRIVATE_KEY],
+      gasPrice: "auto",
+      timeout: 1000000,
+    },
   },
   etherscan: {
     apiKey: {
       polygonMumbai: "88IYFKQV8S4AJCQ3AFKG21E9UP8XMVJS8N",
       goerli: "ERP1M93PMBJFJ4DCAZZ4PNU7VCVNJWKZIB",
+      arbitrumGoerli: "K16XYJQ6RAEJAD62CBMZ315PR3CB6WW71G",
     },
   },
   paths: {
